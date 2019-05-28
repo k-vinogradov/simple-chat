@@ -6,10 +6,11 @@ start:
 
 build:
 	rm -rf dist
-	npm run build
+	babel server --out-dir dist --source-maps inline
+	npx webpack -p --env production
 
 test:
-	npm test
+	jest
 
 lint:
 	npx eslint .
