@@ -4,3 +4,5 @@
 [![Build Status](https://travis-ci.org/k-vinogradov/project-lvl4-s453.svg?branch=master)](https://travis-ci.org/k-vinogradov/project-lvl4-s453)
 
 Oversimple Slack-like web chat.
+
+Live demo: [http://slack.k-vingradov.ru](http://slack.k-vingradov.ru)
