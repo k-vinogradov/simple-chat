@@ -5,4 +5,4 @@
 
 Oversimple Slack-like web chat.
 
-Live demo: [http://slack.k-vingradov.ru](http://slack.k-vingradov.ru)
+Live demo: [http://slack.k-vinogradov.ru](http://slack.k-vinogradov.ru)

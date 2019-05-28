@@ -1,7 +1,7 @@
 {
   "name": "hexlet-slack-practice",
   "version": "0.0.1",
-  "description": "",
+  "description": "Oversimple Slack-like web chat",
   "main": "dist/index.js",
   "bin": {
     "hexlet": "dist/bin/hexlet.js"
