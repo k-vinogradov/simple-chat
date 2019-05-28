@@ -3,8 +3,6 @@ before_install:
 script:
   - make test-ci
   - make build
-before_deploy:
-  - cd ./dist
 deploy:
   provider: heroku
   api_key: $HEROKU_API_KEY
