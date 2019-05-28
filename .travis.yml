@@ -3,6 +3,8 @@ before_install:
 script:
   - make test-ci
   - make build
+before_deploy:
+  - rm -rf ./node_modules
 deploy:
   provider: heroku
   api_key: $HEROKU_API_KEY
