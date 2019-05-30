@@ -1,17 +1,19 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import { ListGroup } from 'react-bootstrap';
+import ChannelItem from './channelitem';
 
-const Sidebar = ({ channels, currentChannelId, onChannelSelected }) => (
+const mapStateToProps = ({ channels: { allCIDs } }) => ({ allCIDs });
+
+const Sidebar = ({ allCIDs }) => (
   <React.Fragment>
     <h5>Channels</h5>
     <ListGroup>
-      {channels.map(({ id, name }) => (
-        <ListGroup.Item key={id} active={id === currentChannelId} onClick={onChannelSelected(id)}>
-          {name}
-        </ListGroup.Item>
+      {allCIDs.map(cid => (
+        <ChannelItem key={cid} cid={cid} />
       ))}
     </ListGroup>
   </React.Fragment>
 );
 
-export default Sidebar;
+export default connect(mapStateToProps)(Sidebar);
