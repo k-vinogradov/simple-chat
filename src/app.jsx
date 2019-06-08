@@ -1,34 +1,56 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { createStore } from 'redux';
+import { createStore, applyMiddleware, compose } from 'redux';
 import { Provider } from 'react-redux';
-import { Row, Col } from 'react-bootstrap';
-import { Sidebar } from './components';
+import Cookies from 'js-cookie';
+import { name } from 'faker';
+import thunk from 'redux-thunk';
+import { App } from './components';
 import reducers from './reducers';
 
-const buildInitialState = ({ channels, messages, currentChannelId }) => ({
-  channels: {
-    allCIDs: channels.map(({ id }) => id),
-    byCID: channels.reduce((acc, channel) => ({ ...acc, [channel.id]: channel }), {}),
-    activeCID: currentChannelId,
-  },
-});
+const setUsername = () => {
+  const username = name.findName();
+  Cookies.set('username', username);
+  return username;
+};
+
+const buildInitialState = ({ channels, messages, currentCID }) => {
+  const allCIDs = channels.map(({ id }) => id);
+  const username = Cookies.get('username') || setUsername();
+  return {
+    data: {
+      channels: {
+        allCIDs,
+        byCID: channels.reduce((acc, channel) => ({ ...acc, [channel.id]: channel }), {}),
+      },
+      messages: messages.reduce((acc, message) => {
+        const { cid } = message;
+        const stored = acc[cid] || [];
+        return { ...acc, [cid]: [...stored, message] };
+      }, {}),
+    },
+    ui: {
+      channelsState: allCIDs.reduce((acc, cid) => ({ ...acc, [cid]: 'synced' }), {}),
+      cache: {},
+      currentCID,
+    },
+    username,
+  };
+};
+
+const makeStore = (gon) => {
+  // eslint-disable-next-line no-underscore-dangle
+  const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+  const state = buildInitialState(gon);
+  return createStore(reducers, state, composeEnhancers(applyMiddleware(thunk)));
+};
 
 const app = (gon) => {
-  const mountNode = document.getElementById('chat');
-  // eslint-disable-next-line no-underscore-dangle
-  const reduxDevtools = window.__REDUX_DEVTOOLS_EXTENSION__;
-  const store = createStore(reducers, buildInitialState(gon), reduxDevtools && reduxDevtools());
   ReactDOM.render(
-    <Provider store={store}>
-      <Row>
-        <Col xs={3}>
-          <Sidebar />
-        </Col>
-        <Col />
-      </Row>
+    <Provider store={makeStore(gon)}>
+      <App gon={gon} />
     </Provider>,
-    mountNode,
+    document.getElementById('chat'),
   );
 };
 

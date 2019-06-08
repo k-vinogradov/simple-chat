@@ -1,12 +1,24 @@
 import React from 'react';
-import { ListGroup } from 'react-bootstrap';
+import {
+  Row, Col, Button, Dropdown,
+} from 'react-bootstrap';
 import { connect } from 'react-redux';
 import * as actions from '../actions';
+import ChannelOptButton from './channeloptbutton';
 
-const mapStateToProps = ({ channels: { byCID, activeCID } }, { cid }) => ({
+const mapStateToProps = (
+  {
+    data: {
+      channels: { byCID },
+    },
+    ui: { currentCID },
+  },
+  { cid },
+) => ({
   cid,
   name: byCID[cid].name,
-  active: activeCID === cid,
+  removable: byCID[cid].removable,
+  active: currentCID === cid,
 });
 
 const actionCreators = {
@@ -16,15 +28,50 @@ const actionCreators = {
 class ChannelItem extends React.Component {
   handleChannelSelected = () => {
     const { cid, selectChannel } = this.props;
-    selectChannel({ cid });
+    selectChannel(cid);
   };
 
-  render() {
+  handleChannelRename = () => {
+    console.log('Rename channel');
+  };
+
+  renderChannelButton() {
     const { name, active } = this.props;
+    const variant = active ? 'secondary' : 'light';
     return (
-      <ListGroup.Item active={active} onClick={this.handleChannelSelected}>
+      <Button
+        className="text-left w-100"
+        onClick={this.handleChannelSelected}
+        variant={variant}
+      >
         {name}
-      </ListGroup.Item>
+      </Button>
+    );
+  }
+
+  renderDropDownMenu() {
+    const { removable } = this.props;
+    if (!removable) return null;
+    return (
+      <Dropdown>
+        <Dropdown.Toggle as={ChannelOptButton} id="dropdown-custom-components" />
+
+        <Dropdown.Menu>
+          <Dropdown.Item eventKey="1" onClick={this.handleChannelRename}>
+            Rename
+          </Dropdown.Item>
+          <Dropdown.Item eventKey="2">Delete</Dropdown.Item>
+        </Dropdown.Menu>
+      </Dropdown>
+    );
+  }
+
+  render() {
+    return (
+      <Row>
+        <Col className="p-1">{this.renderChannelButton()}</Col>
+        <Col md={1}>{this.renderDropDownMenu()}</Col>
+      </Row>
     );
   }
 }

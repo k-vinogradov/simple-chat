@@ -12,7 +12,7 @@ export default (router, io) => {
       { id: randomChannelId, name: 'random', removable: false },
     ],
     messages: [],
-    currentChannelId: generalChannelId,
+    currentCID: generalChannelId,
   };
 
   const state = { ...defaultState };
@@ -85,7 +85,7 @@ export default (router, io) => {
       const { data: { attributes } } = ctx.request.body;
       const message = {
         ...attributes,
-        channelId: Number(ctx.params.channelId),
+        cid: Number(ctx.params.channelId),
         id: getNextId(),
       };
       state.messages.push(message);
