@@ -11,8 +11,8 @@ const actionCreators = {
   postMessage: postMessageAction,
 };
 
-const mapStateToProps = ({ ui: { channelsState, currentCID } }) => ({
-  state: channelsState[currentCID],
+const mapStateToProps = ({ ui: { channels, currentCID } }) => ({
+  ...channels[currentCID],
 });
 
 class MessageForm extends React.Component {
@@ -23,7 +23,7 @@ class MessageForm extends React.Component {
 
   render() {
     const { handleSubmit, state } = this.props;
-    const disabled = !['synced', 'error'].includes(state);
+    const disabled = state === 'sending';
     const inputClassName = classnames({
       'form-control': true,
       'is-invalid': state === 'error',

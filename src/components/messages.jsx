@@ -1,11 +1,17 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { Row, Col } from 'react-bootstrap';
-import _ from 'lodash';
 import classnames from 'classnames';
 
+const getMessageArrayByCID = (messages, cid) => {
+  const messagesById = messages[cid] || {};
+  return Object.keys(messagesById)
+    .sort((a, b) => a - b)
+    .map(id => messagesById[id]);
+};
+
 const mapStateToProps = ({ data: { messages }, ui: { currentCID }, username }) => ({
-  messages: _.get(messages, currentCID, []),
+  messages: getMessageArrayByCID(messages, currentCID),
   ownName: username,
 });
 

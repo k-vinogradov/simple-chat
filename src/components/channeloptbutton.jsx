@@ -9,8 +9,8 @@ class ChannelOptButton extends React.Component {
 
   render() {
     return (
-      <Button variant="link" size="sm" onClick={this.handleClick}>
-        …
+      <Button variant="outline-dark" onClick={this.handleClick} className="border-0">
+        <strong>⋮</strong>
       </Button>
     );
   }

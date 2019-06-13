@@ -21,7 +21,7 @@ export default (router, io) => {
   apiRouter
     .get('/channels', (ctx) => {
       ctx.body = state.channels;
-      ctx.status = 301;
+      // ctx.status = 201;
     })
     .post('/channels', (ctx) => {
       const { data: { attributes: { name } } } = ctx.request.body;
@@ -73,13 +73,14 @@ export default (router, io) => {
       io.emit('renameChannel', data);
     })
     .get('/channels/:channelId/messages', (ctx) => {
-      const messages = state.messages.filter(m => m.channelId === Number(ctx.params.channelId));
+      const messages = state.messages.filter(m => m.cid === Number(ctx.params.channelId));
       const resources = messages.map(m => ({
         type: 'messages',
         id: m.id,
         attributes: m,
       }));
       ctx.body = resources;
+      ctx.status = 200;
     })
     .post('/channels/:channelId/messages', (ctx) => {
       const { data: { attributes } } = ctx.request.body;

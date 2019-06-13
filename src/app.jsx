@@ -24,14 +24,17 @@ const buildInitialState = ({ channels, messages, currentCID }) => {
         byCID: channels.reduce((acc, channel) => ({ ...acc, [channel.id]: channel }), {}),
       },
       messages: messages.reduce((acc, message) => {
-        const { cid } = message;
-        const stored = acc[cid] || [];
-        return { ...acc, [cid]: [...stored, message] };
+        const { cid, id } = message;
+        const stored = acc[cid] || {};
+        return { ...acc, [cid]: { ...stored, [id]: message } };
       }, {}),
     },
     ui: {
-      channelsState: allCIDs.reduce((acc, cid) => ({ ...acc, [cid]: 'synced' }), {}),
-      cache: {},
+      channels: allCIDs.reduce(
+        (acc, cid) => ({ ...acc, [cid]: { state: 'ok', messageCache: '' } }),
+        {},
+      ),
+      channelDialogState: { state: 'inactive', cid: null },
       currentCID,
     },
     username,
