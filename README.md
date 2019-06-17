@@ -7,4 +7,8 @@ Oversimple Slack-like web chat, which has been implemented as a student project 
 
 Live demo: [http://slack.k-vinogradov.ru](http://slack.k-vinogradov.ru)
 
-**Safari doesn't support WebSockets through an unsecured connection. Use the Heroku domain URL instead: [https://hexlet-learning-slack.herokuapp.com](https://hexlet-learning-slack.herokuapp.com).**
+## Note for Safari Users
+
+**There is some issue with WebSocket through an unsecured connection in Safari. Use the Heroku domain URL instead:**
+
+**[https://hexlet-learning-slack.herokuapp.com](https://hexlet-learning-slack.herokuapp.com)**
