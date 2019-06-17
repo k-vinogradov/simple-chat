@@ -7,7 +7,7 @@ import Messages from './messages';
 import MessageForm from './messageform';
 import ChannelForm from './channelform';
 import ChannelDeleteDialog from './delete';
-import { getChannels, getMessages } from '../requests';
+import { getChannels, getMessages } from '../api';
 
 const mapStateToProps = ({ username }) => ({ username });
 

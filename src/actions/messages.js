@@ -1,5 +1,5 @@
 import { createAction } from 'redux-actions';
-import { sendMessage } from '../requests';
+import { sendMessage } from '../api';
 
 export const updateMessages = createAction('UPDATE_MESSAGES');
 

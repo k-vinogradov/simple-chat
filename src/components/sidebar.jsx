@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from 'react-bootstrap';
+import { Button, Col, Row } from 'react-bootstrap';
 import ChannelItem from './channelitem';
 import { connect, isLockedState } from './util';
 
@@ -15,9 +15,13 @@ const Sidebar = ({ channels, openAddChannelDialog, disabled }) => (
     {channels.map(cid => (
       <ChannelItem key={cid} cid={cid} />
     ))}
-    <Button onClick={openAddChannelDialog} disabled={disabled}>
-      New channel...
-    </Button>
+    <Row className="p-2">
+      <Col>
+        <Button onClick={openAddChannelDialog} disabled={disabled}>
+          New channel...
+        </Button>
+      </Col>
+    </Row>
   </React.Fragment>
 );
 

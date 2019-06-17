@@ -1,5 +1,5 @@
 import { createAction } from 'redux-actions';
-import { postChannel, patchChannel, deleteChannel as deleteChannelQuery } from '../requests';
+import { postChannel, patchChannel, deleteChannel as deleteChannelQuery } from '../api';
 
 export const applyChannelSet = createAction('APPLY_CHANNEL_SET');
 
