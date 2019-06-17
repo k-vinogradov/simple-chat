@@ -30,11 +30,10 @@ const buildInitialState = ({ channels, messages, currentCID }) => {
       }, {}),
     },
     ui: {
-      channels: allCIDs.reduce(
-        (acc, cid) => ({ ...acc, [cid]: { state: 'ok', messageCache: '' } }),
-        {},
-      ),
-      channelDialogState: { state: 'inactive', cid: null },
+      globalUiState: 'normal',
+      messageFormState: 'ok',
+      channelFormDialogState: { state: 'ok', cid: null },
+      channelDeleteDialogState: { state: 'ok', cid: null },
       currentCID,
     },
     username,

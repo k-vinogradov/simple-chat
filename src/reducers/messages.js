@@ -1,4 +1,5 @@
 import { handleActions } from 'redux-actions';
+import _ from 'lodash';
 import * as actions from '../actions';
 
 export default handleActions(
@@ -11,6 +12,10 @@ export default handleActions(
     [actions.updateMessages]: (state, { payload: { cid, messages } }) => {
       const stored = state[cid] || {};
       return { ...state, [cid]: { ...stored, ...messages } };
+    },
+    [actions.removeChannelFromState]: (state, { payload: { cid } }) => {
+      const check = (value, key) => Number(key) !== Number(cid);
+      return _.pickBy(state, check);
     },
   },
   {},

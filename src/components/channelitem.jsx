@@ -2,8 +2,7 @@ import React from 'react';
 import {
   Row, Col, Button, Dropdown,
 } from 'react-bootstrap';
-import { connect } from 'react-redux';
-import * as actions from '../actions';
+import { connect, isLockedState } from './util';
 import ChannelOptButton from './channeloptbutton';
 
 const mapStateToProps = (
@@ -11,42 +10,46 @@ const mapStateToProps = (
     data: {
       channels: { byCID },
     },
-    ui: { currentCID, channels },
+    ui: { currentCID, globalUiState },
   },
   { cid },
 ) => {
-  const state = channels[cid];
-  const disabled = Object.values(channels).find(item => item.state === 'sending') !== undefined;
-  const active = currentCID === cid;
+  const { name, removable } = byCID[cid];
   return {
-    ...byCID[cid],
-    disabled,
-    active,
-    state,
+    cid,
+    currentCID,
+    name,
+    removable,
+    disabled: isLockedState(globalUiState),
+    buttonVariant: cid === currentCID ? 'secondary' : 'light',
   };
 };
 
-const actionCreators = {
-  selectChannel: actions.selectChannel,
-  renameChannel: actions.openRenameChannelDialog,
-};
-
+@connect(mapStateToProps)
 class ChannelItem extends React.Component {
   select = () => {
-    const { cid, state, selectChannel } = this.props;
-    selectChannel({ cid, state });
+    const {
+      cid, name, currentCID, selectChannel,
+    } = this.props;
+    if (cid === currentCID) return;
+    selectChannel({ cid, name });
   };
 
   rename = () => {
-    const { cid, name, renameChannel } = this.props;
-    renameChannel({ cid, name });
+    const { cid, name, openRenameChannelDialog } = this.props;
+    openRenameChannelDialog({ cid, name });
+  };
+
+  delete = () => {
+    const { cid, openChannelDeleteDialog } = this.props;
+    openChannelDeleteDialog({ cid });
   };
 
   renderChannelButton() {
-    const { name, active, disabled } = this.props;
+    const { name, buttonVariant, disabled } = this.props;
     const props = {
       disabled,
-      variant: active ? 'secondary' : 'light',
+      variant: buttonVariant,
       onClick: this.select,
       className: 'text-left w-100',
     };
@@ -64,7 +67,9 @@ class ChannelItem extends React.Component {
           <Dropdown.Item eventKey="1" onClick={this.rename}>
             Rename
           </Dropdown.Item>
-          <Dropdown.Item eventKey="2">Delete</Dropdown.Item>
+          <Dropdown.Item eventKey="2" onClick={this.delete}>
+            Delete
+          </Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown>
     );
@@ -82,7 +87,4 @@ class ChannelItem extends React.Component {
   }
 }
 
-export default connect(
-  mapStateToProps,
-  actionCreators,
-)(ChannelItem);
+export default ChannelItem;

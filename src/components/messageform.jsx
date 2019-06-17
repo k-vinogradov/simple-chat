@@ -1,20 +1,18 @@
 import React from 'react';
-import { Field, reduxForm } from 'redux-form';
-import { connect } from 'react-redux';
+import { Field } from 'redux-form';
 import {
   Row, Col, Form, InputGroup, Button,
 } from 'react-bootstrap';
 import classnames from 'classnames';
-import { postMessage as postMessageAction } from '../actions';
+import { connect, isLockedState, reduxForm } from './util';
 
-const actionCreators = {
-  postMessage: postMessageAction,
+const mapStateToProps = ({ ui: { messageFormState, globalUiState } }) => {
+  const disabled = isLockedState(globalUiState);
+  return { disabled, messageFormState };
 };
 
-const mapStateToProps = ({ ui: { channels, currentCID } }) => ({
-  ...channels[currentCID],
-});
-
+@connect(mapStateToProps)
+@reduxForm('newMessage')
 class MessageForm extends React.Component {
   submit = ({ text }) => {
     const { postMessage } = this.props;
@@ -22,11 +20,10 @@ class MessageForm extends React.Component {
   };
 
   render() {
-    const { handleSubmit, state } = this.props;
-    const disabled = state === 'sending';
+    const { handleSubmit, messageFormState, disabled } = this.props;
     const inputClassName = classnames({
       'form-control': true,
-      'is-invalid': state === 'error',
+      'is-invalid': messageFormState === 'error',
     });
     return (
       <Row>
@@ -44,7 +41,7 @@ class MessageForm extends React.Component {
                 aria-describedby="sendButton"
               />
               <div className="input-group-append">
-                <Button variant="secondary" type="submit" id="sendButton">
+                <Button variant="secondary" type="submit" id="sendButton" disabled={disabled}>
                   Send
                 </Button>
               </div>
@@ -57,7 +54,4 @@ class MessageForm extends React.Component {
   }
 }
 
-export default connect(
-  mapStateToProps,
-  actionCreators,
-)(reduxForm({ form: 'newMessage' })(MessageForm));
+export default MessageForm;

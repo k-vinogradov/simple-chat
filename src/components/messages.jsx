@@ -1,7 +1,7 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import { Row, Col } from 'react-bootstrap';
 import classnames from 'classnames';
+import { connect } from './util';
 
 const getMessageArrayByCID = (messages, cid) => {
   const messagesById = messages[cid] || {};

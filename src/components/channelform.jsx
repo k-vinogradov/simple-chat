@@ -1,18 +1,30 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import { Modal, Button, Form } from 'react-bootstrap';
-import { Field, reduxForm } from 'redux-form';
+import { Field } from 'redux-form';
 import classnames from 'classnames';
-import * as actions from '../actions';
+import { connect, reduxForm } from './util';
 
-const mapStateToProps = ({ ui: { channelDialogState } }) => ({ ...channelDialogState });
-
-const actionCreators = {
-  close: actions.closeChannelDialog,
-  addChannel: actions.addChannel,
-  renameChannel: actions.renameChannel,
+const mapUIStateToDialogProps = (globalState, dialogState) => {
+  const invalid = dialogState === 'errorNew' || dialogState === 'errorRename';
+  switch (globalState) {
+    case 'channelFormDialog':
+      return { invalid, disabled: false, show: true };
+    case 'channelFormDialogLocked':
+      return { invalid, disabled: true, show: true };
+    default:
+      return { invalid, disabled: false, show: false };
+  }
 };
 
+const mapStateToProps = ({
+  ui: {
+    globalUiState,
+    channelFormDialogState: { state, cid },
+  },
+}) => ({ uiProps: mapUIStateToDialogProps(globalUiState, state), cid, state });
+
+@connect(mapStateToProps)
+@reduxForm('channelForm')
 class ChannelForm extends React.Component {
   submitNewChannel = ({ text }) => {
     const { addChannel } = this.props;
@@ -24,7 +36,7 @@ class ChannelForm extends React.Component {
     renameChannel(cid, text);
   };
 
-  submit = () => {
+  getSubmitHandler = () => {
     const { state } = this.props;
     switch (state) {
       case 'new':
@@ -38,23 +50,17 @@ class ChannelForm extends React.Component {
     }
   };
 
-  mapUIStateToDialogProps = state => ({
-    new: { disabled: false, invalid: false, show: true },
-    rename: { disabled: false, invalid: false, show: true },
-    sending: { disabled: true, invalid: false, show: true },
-    errorNew: { disabled: false, invalid: true, show: true },
-    errorRename: { disabled: false, invalid: true, show: true },
-    inactive: { disabled: false, invalid: false, show: false },
-  }[state]);
-
   render() {
-    const { close, handleSubmit, state } = this.props;
-    const { disabled, invalid, show } = this.mapUIStateToDialogProps(state);
+    const {
+      uiProps: { disabled, invalid, show },
+      closeChannelDialog,
+      handleSubmit,
+    } = this.props;
     const fieldClassName = classnames({ 'form-control': true, 'is-invalid': invalid });
     return (
       <Modal show={show} backdrop="static">
         <Modal.Body>
-          <Form onSubmit={handleSubmit(this.submit())}>
+          <Form onSubmit={handleSubmit(this.getSubmitHandler())}>
             <Form.Group controlId="formBasicEmail">
               <Field
                 props={{ disabled }}
@@ -68,7 +74,7 @@ class ChannelForm extends React.Component {
               <div className="invalid-feedback">Failed to save data</div>
             </Form.Group>
             <Modal.Footer>
-              <Button variant="secondary" onClick={close} disabled={disabled}>
+              <Button variant="secondary" onClick={closeChannelDialog} disabled={disabled}>
                 Close
               </Button>
               <Button variant="primary" type="submit" disabled={disabled}>
@@ -82,7 +88,4 @@ class ChannelForm extends React.Component {
   }
 }
 
-export default connect(
-  mapStateToProps,
-  actionCreators,
-)(reduxForm({ form: 'channelForm' })(ChannelForm));
+export default ChannelForm;

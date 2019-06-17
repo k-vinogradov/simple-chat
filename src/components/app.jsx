@@ -1,26 +1,21 @@
 import React from 'react';
 import io from 'socket.io-client';
 import { Row, Col } from 'react-bootstrap';
-import { connect } from 'react-redux';
+import { connect } from './util';
 import Sidebar from './sidebar';
 import Messages from './messages';
 import MessageForm from './messageform';
 import ChannelForm from './channelform';
-import * as actions from '../actions';
+import ChannelDeleteDialog from './delete';
 import { getChannels, getMessages } from '../requests';
-
-const actionCreators = {
-  applyChannelSet: actions.applyChannelSet,
-  updateMessages: actions.updateMessages,
-  receiveNewChannel: actions.receiveNewChannel,
-};
 
 const mapStateToProps = ({ username }) => ({ username });
 
+@connect(mapStateToProps)
 class App extends React.Component {
   componentDidMount() {
     const socket = io({ timeout: 20 });
-    const { updateMessages, receiveNewChannel } = this.props;
+    const { updateMessages, pushChannelToState, removeChannelFromState } = this.props;
     socket
       .on('newMessage', ({ data: { attributes } }) => {
         const { cid, id } = attributes;
@@ -28,10 +23,14 @@ class App extends React.Component {
       })
       .on('newChannel', ({ data: { attributes } }) => {
         const { id } = attributes;
-        console.log(attributes);
-        receiveNewChannel({ cid: id, byCID: { [id]: attributes } });
+        pushChannelToState({ cid: id, byCID: { [id]: attributes } });
         this.syncChanel(id);
       })
+      .on('renameChannel', ({ data: { attributes } }) => {
+        const { id } = attributes;
+        pushChannelToState({ cid: id, byCID: { [id]: attributes } });
+      })
+      .on('removeChannel', ({ data: { id } }) => removeChannelFromState({ cid: id }))
 
       // Reconnect means that we've been being offline for a while.
       // Makes sense to resynchronize the entire base to get missed updates
@@ -82,12 +81,10 @@ class App extends React.Component {
           </Col>
         </Row>
         <ChannelForm />
+        <ChannelDeleteDialog />
       </React.Fragment>
     );
   }
 }
 
-export default connect(
-  mapStateToProps,
-  actionCreators,
-)(App);
+export default App;

@@ -1,30 +1,24 @@
 import React from 'react';
-import { connect } from 'react-redux';
 import { Button } from 'react-bootstrap';
 import ChannelItem from './channelitem';
-import { openAddChannelDialog } from '../actions';
+import { connect, isLockedState } from './util';
 
 const mapStateToProps = ({
   data: {
     channels: { allCIDs },
   },
-  ui: { addChannel },
-}) => ({ allCIDs, addChannel });
+  ui: { globalUiState },
+}) => ({ channels: allCIDs, disabled: isLockedState(globalUiState) });
 
-const actionCreators = {
-  addChannel: openAddChannelDialog,
-};
-
-const Sidebar = ({ allCIDs, addChannel }) => (
+const Sidebar = ({ channels, openAddChannelDialog, disabled }) => (
   <React.Fragment>
-    {allCIDs.map(cid => (
+    {channels.map(cid => (
       <ChannelItem key={cid} cid={cid} />
     ))}
-    <Button onClick={addChannel}>New channel...</Button>
+    <Button onClick={openAddChannelDialog} disabled={disabled}>
+      New channel...
+    </Button>
   </React.Fragment>
 );
 
-export default connect(
-  mapStateToProps,
-  actionCreators,
-)(Sidebar);
+export default connect(mapStateToProps)(Sidebar);

@@ -8,7 +8,12 @@ export {
   renameChannelRequest,
   renameChannelSuccess,
   renameChannelFailure,
-  receiveNewChannel,
+  pushChannelToState,
+  deleteChannel,
+  deleteChannelRequest,
+  deleteChannelSuccess,
+  deleteChannelFailure,
+  removeChannelFromState,
 } from './channels';
 
 export {
@@ -24,4 +29,6 @@ export {
   closeChannelDialog,
   selectChannel,
   openRenameChannelDialog,
+  openChannelDeleteDialog,
+  closeChannelDeleteDialog,
 } from './ui';

@@ -2,39 +2,73 @@ import { handleActions } from 'redux-actions';
 import { reducer as formReducer } from 'redux-form';
 import * as actions from '../actions';
 
-const setChannelDialog = (fullState, state, cid = null) => ({
-  ...fullState,
-  channelDialogState: { state, cid },
-});
-
-const setChannel = (fullState, state, cid, messageCache) => ({
-  ...fullState,
-  [cid]: { state, messageCache },
-});
-
 const ui = handleActions(
   {
-    [actions.postMessageRequest]: (state, { payload: { cid, body } }) => setChannel(state, cid, 'sending', body),
-    [actions.postMessageSuccess]: (state, { payload: { cid } }) => setChannel(state, cid, 'ok', ''),
-    [actions.postMessageFailure]: (state, { payload: { cid, body } }) => setChannel(state, cid, 'error', body),
-
-    [actions.selectChannel]: (state, { payload: { cid } }) => ({ ...state, currentCID: cid }),
-
-    [actions.closeChannelDialog]: state => setChannelDialog(state, 'inactive'),
-
-    [actions.openAddChannelDialog]: state => setChannelDialog(state, 'new'),
-    [actions.addChannelRequest]: state => setChannelDialog(state, 'sending'),
-    [actions.addChannelSuccess]: state => setChannelDialog(state, 'inactive'),
-    [actions.addChannelFailure]: state => setChannelDialog(state, 'errorNew'),
-    [actions.receiveNewChannel]: (state, { payload: { cid } }) => ({
+    [actions.postMessageRequest]: state => ({ ...state, globalUiState: 'normalLocked' }),
+    [actions.postMessageSuccess]: state => ({
       ...state,
-      channels: { ...state.channels, [cid]: { state: 'ok', messageCache: '' } },
+      messageFormState: 'ok',
+      globalUiState: 'normal',
+    }),
+    [actions.postMessageFailure]: state => ({
+      ...state,
+      messageFormState: 'error',
+      globalUiState: 'normal',
     }),
 
-    [actions.openRenameChannelDialog]: (state, { payload: { cid } }) => setChannelDialog(state, 'rename', cid),
-    [actions.renameChannelRequest]: (state, { payload: { cid } }) => setChannelDialog(state, 'sending', cid),
-    [actions.renameChannelSuccess]: state => setChannelDialog(state, 'inactive'),
-    [actions.renameChannelFailure]: (state, { payload: { cid } }) => setChannelDialog(state, 'errorRename', cid),
+    [actions.selectChannel]: (state, { payload: { cid } }) => ({
+      ...state,
+      currentCID: cid,
+      messageFormState: 'ok',
+      globalUiState: 'normal',
+    }),
+
+    [actions.closeChannelDialog]: state => ({ ...state, globalUiState: 'normal' }),
+    [actions.openAddChannelDialog]: state => ({
+      ...state,
+      globalUiState: 'channelFormDialog',
+      channelFormDialogState: { state: 'new', cid: null },
+    }),
+    [actions.addChannelRequest]: state => ({ ...state, globalUiState: 'channelFormDialogLocked' }),
+    [actions.addChannelSuccess]: state => ({ ...state, globalUiState: 'normal' }),
+    [actions.addChannelFailure]: state => ({
+      ...state,
+      globalUiState: 'channelFormDialog',
+      channelFormDialogState: { state: 'errorNew', cid: null },
+    }),
+
+    [actions.openRenameChannelDialog]: (state, { payload: { cid } }) => ({
+      ...state,
+      globalUiState: 'channelFormDialog',
+      channelFormDialogState: { state: 'rename', cid },
+    }),
+    [actions.renameChannelRequest]: state => ({
+      ...state,
+      globalUiState: 'channelFormDialogLocked',
+    }),
+    [actions.renameChannelSuccess]: state => ({ ...state, globalUiState: 'normal' }),
+    [actions.renameChannelFailure]: state => ({
+      ...state,
+      globalUiState: 'channelFormDialog',
+      channelFormDialogState: { ...state.channelFormDialogState, state: 'errorRename' },
+    }),
+
+    [actions.openChannelDeleteDialog]: (state, { payload: { cid } }) => ({
+      ...state,
+      globalUiState: 'channelDeleteDialog',
+      channelDeleteDialogState: { state: 'ok', cid },
+    }),
+    [actions.deleteChannelRequest]: state => ({
+      ...state,
+      globalUiState: 'channelDeleteDialogLocked',
+    }),
+    [actions.deleteChannelFailure]: state => ({
+      ...state,
+      globalUiState: 'channelDeleteDialog',
+      channelDeleteDialogState: { ...state.channelDeleteDialogState, state: 'error' },
+    }),
+    [actions.closeChannelDeleteDialog]: state => ({ ...state, globalUiState: 'normal' }),
+    [actions.deleteChannelSuccess]: state => ({ ...state, globalUiState: 'normal' }),
   },
   {},
 );
@@ -47,24 +81,15 @@ const setFormText = (state, text) => ({
 const form = formReducer.plugin({
   newMessage: handleActions(
     {
-      [actions.selectChannel]: (
-        state,
-        {
-          payload: {
-            state: { messageCache },
-          },
-        },
-      ) => setFormText(state, messageCache),
+      [actions.selectChannel]: state => setFormText(state, ''),
       [actions.postMessageSuccess]: state => setFormText(state, ''),
     },
     {},
   ),
   channelForm: handleActions(
     {
-      [actions.closeChannelDialog]: state => setFormText(state, ''),
-      [actions.addChannelSuccess]: state => setFormText(state, ''),
+      [actions.openAddChannelDialog]: state => setFormText(state, ''),
       [actions.openRenameChannelDialog]: (state, { payload: { name } }) => setFormText(state, name),
-      [actions.renameChannelSuccess]: state => setFormText(state, ''),
     },
     {},
   ),
