@@ -2,7 +2,7 @@ import React from 'react';
 import {
   Row, Col, Button, Dropdown,
 } from 'react-bootstrap';
-import { connect, isLockedState } from './util';
+import { connect } from './util';
 import ChannelOptButton from './channeloptbutton';
 
 const mapStateToProps = (
@@ -10,7 +10,7 @@ const mapStateToProps = (
     data: {
       channels: { byCID },
     },
-    ui: { currentCID, globalUiState },
+    ui: { currentCID },
   },
   { cid },
 ) => {
@@ -20,7 +20,6 @@ const mapStateToProps = (
     currentCID,
     name,
     removable,
-    disabled: isLockedState(globalUiState),
     buttonVariant: cid === currentCID ? 'secondary' : 'light',
   };
 };
@@ -29,7 +28,7 @@ const mapStateToProps = (
 class ChannelItem extends React.Component {
   select = () => {
     const {
-      cid, name, currentCID, selectChannel,
+      cid, currentCID, name, selectChannel,
     } = this.props;
     if (cid === currentCID) return;
     selectChannel({ cid, name });
@@ -46,9 +45,8 @@ class ChannelItem extends React.Component {
   };
 
   renderChannelButton() {
-    const { name, buttonVariant, disabled } = this.props;
+    const { name, buttonVariant } = this.props;
     const props = {
-      disabled,
       variant: buttonVariant,
       onClick: this.select,
       className: 'text-left w-100',
@@ -62,7 +60,6 @@ class ChannelItem extends React.Component {
     return (
       <Dropdown>
         <Dropdown.Toggle as={ChannelOptButton} id="dropdown-custom-components" />
-
         <Dropdown.Menu>
           <Dropdown.Item eventKey="1" onClick={this.rename}>
             Rename

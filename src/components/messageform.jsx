@@ -1,51 +1,53 @@
 import React from 'react';
-import { Field } from 'redux-form';
+import { Field, SubmissionError } from 'redux-form';
 import {
   Row, Col, Form, InputGroup, Button,
 } from 'react-bootstrap';
 import classnames from 'classnames';
-import { connect, isLockedState, reduxForm } from './util';
+import { connect, reduxForm } from './util';
+import { sendMessage } from '../api';
 
-const mapStateToProps = ({ ui: { messageFormState, globalUiState } }) => {
-  const disabled = isLockedState(globalUiState);
-  return { disabled, messageFormState };
-};
+const mapStateToProps = ({ ui: { currentCID }, username }) => ({ currentCID, username });
 
 @connect(mapStateToProps)
 @reduxForm('newMessage')
 class MessageForm extends React.Component {
-  submit = ({ text }) => {
-    const { postMessage } = this.props;
-    postMessage(text);
+  submit = async ({ body }) => {
+    const { currentCID: cid, username, reset } = this.props;
+    try {
+      await sendMessage({ cid, username, body });
+    } catch (error) {
+      throw new SubmissionError({ _error: error.message });
+    }
+    reset();
   };
 
   render() {
-    const { handleSubmit, messageFormState, disabled } = this.props;
-    const inputClassName = classnames({
-      'form-control': true,
-      'is-invalid': messageFormState === 'error',
-    });
+    const {
+      error, handleSubmit, pristine, submitting,
+    } = this.props;
+    const className = classnames({ 'form-control': true, 'is-invalid': error });
     return (
       <Row>
         <Col>
           <Form onSubmit={handleSubmit(this.submit)} className="m-2">
             <InputGroup>
               <Field
-                props={{ disabled }}
-                name="text"
+                props={{ disabled: submitting }}
+                name="body"
                 required
                 component="input"
                 type="text"
-                className={inputClassName}
+                className={className}
                 placeholder="New message"
                 aria-describedby="sendButton"
               />
               <div className="input-group-append">
-                <Button variant="secondary" type="submit" id="sendButton" disabled={disabled}>
+                <Button type="submit" id="sendButton" disabled={pristine || submitting}>
                   Send
                 </Button>
               </div>
-              <div className="invalid-feedback">Failed to send the message</div>
+              <div className="invalid-feedback">{`Failed: ${error}`}</div>
             </InputGroup>
           </Form>
         </Col>

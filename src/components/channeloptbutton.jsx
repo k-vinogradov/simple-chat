@@ -1,10 +1,6 @@
 import React from 'react';
 import { Button } from 'react-bootstrap';
-import { connect, isLockedState } from './util';
 
-const mapStateToProps = ({ ui: { globalUiState } }) => ({ disabled: isLockedState(globalUiState) });
-
-@connect(mapStateToProps)
 class ChannelOptButton extends React.Component {
   handleClick = (event) => {
     const { onClick } = this.props;

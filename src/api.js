@@ -1,4 +1,5 @@
 import axios from 'axios';
+import _ from 'lodash';
 
 const apiUrl = (...path) => `/api/v1/channels/${path.join('/')}`;
 const channels = apiUrl;
@@ -20,12 +21,13 @@ export const getChannels = async () => {
 export const getMessages = async (cid) => {
   const url = messages(cid);
   const { data } = await axios.get(url);
-  return data.reduce((acc, { id, attributes }) => ({ ...acc, [id]: attributes }), {});
+  const messageArray = data.map(({ attributes }) => attributes);
+  return _.keyBy(messageArray, ({ id }) => id);
 };
 
 export const postChannel = async name => axios.post(apiUrl(), { data: { attributes: { name } } });
 
-export const patchChannel = async (cid, name) => {
+export const patchChannel = async (name, cid) => {
   const url = channels(cid);
   return axios.patch(url, { data: { attributes: { name } } });
 };

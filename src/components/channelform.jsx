@@ -1,83 +1,88 @@
 import React from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
-import { Field } from 'redux-form';
+import { Field, SubmissionError } from 'redux-form';
 import classnames from 'classnames';
 import { connect, reduxForm } from './util';
-
-const mapUIStateToDialogProps = (globalState, dialogState) => {
-  const invalid = dialogState === 'errorNew' || dialogState === 'errorRename';
-  switch (globalState) {
-    case 'channelFormDialog':
-      return { invalid, disabled: false, show: true };
-    case 'channelFormDialogLocked':
-      return { invalid, disabled: true, show: true };
-    default:
-      return { invalid, disabled: false, show: false };
-  }
-};
+import { postChannel, patchChannel } from '../api';
 
 const mapStateToProps = ({
+  data: {
+    channels: { byCID },
+  },
   ui: {
-    globalUiState,
     channelFormDialogState: { state, cid },
   },
-}) => ({ uiProps: mapUIStateToDialogProps(globalUiState, state), cid, state });
+}) => ({
+  apiMethod: state === 'new' ? postChannel : patchChannel,
+  cid,
+  name: state === 'rename' ? byCID[cid].name : '',
+  show: state !== 'inactive',
+});
 
 @connect(mapStateToProps)
 @reduxForm('channelForm')
 class ChannelForm extends React.Component {
-  submitNewChannel = ({ text }) => {
-    const { addChannel } = this.props;
-    addChannel(text);
-  };
+  shouldComponentUpdate(nextProps) {
+    const { initialize, name, submitting } = nextProps;
+    if (!submitting) initialize({ name }, true);
+    return true;
+  }
 
-  submitRenameChannel = ({ text }) => {
-    const { cid, renameChannel } = this.props;
-    renameChannel(cid, text);
-  };
-
-  getSubmitHandler = () => {
-    const { state } = this.props;
-    switch (state) {
-      case 'new':
-      case 'errorNew':
-        return this.submitNewChannel;
-      case 'rename':
-      case 'errorRename':
-        return this.submitRenameChannel;
-      default:
-        return () => {};
+  submit = async ({ name }) => {
+    const {
+      cid, reset, closeChannelDialog, apiMethod,
+    } = this.props;
+    try {
+      await apiMethod(name, cid);
+    } catch ({ message }) {
+      throw new SubmissionError({ _error: message });
     }
+    closeChannelDialog();
+    reset();
+  };
+
+  close = () => {
+    const { reset, closeChannelDialog } = this.props;
+    reset();
+    closeChannelDialog();
   };
 
   render() {
     const {
-      uiProps: { disabled, invalid, show },
-      closeChannelDialog,
-      handleSubmit,
+      error, handleSubmit, pristine, show, submitting,
     } = this.props;
-    const fieldClassName = classnames({ 'form-control': true, 'is-invalid': invalid });
+    const fieldClassName = classnames({ 'form-control': true, 'is-invalid': error });
     return (
       <Modal show={show} backdrop="static">
         <Modal.Body>
-          <Form onSubmit={handleSubmit(this.getSubmitHandler())}>
+          <Form onSubmit={handleSubmit(this.submit)}>
             <Form.Group controlId="formBasicEmail">
               <Field
-                props={{ disabled }}
-                name="text"
+                props={{ disabled: submitting }}
+                name="name"
                 required
                 component="input"
                 type="text"
                 className={fieldClassName}
                 placeholder="Channel name"
               />
-              <div className="invalid-feedback">Failed to save data</div>
+              <div className="invalid-feedback">{`Failed to save data: ${error}`}</div>
             </Form.Group>
             <Modal.Footer>
-              <Button variant="secondary" onClick={closeChannelDialog} disabled={disabled}>
+              <Button
+                variant="secondary"
+                id="closeChannelForm"
+                onClick={this.close}
+                disabled={submitting}
+              >
                 Close
               </Button>
-              <Button variant="primary" type="submit" disabled={disabled}>
+              <Button
+                variant="primary"
+                id="submitChannelForm"
+                type="submit"
+                disabled={pristine || submitting}
+              >
                 Save
               </Button>
             </Modal.Footer>

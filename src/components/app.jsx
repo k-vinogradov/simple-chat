@@ -6,7 +6,7 @@ import Sidebar from './sidebar';
 import Messages from './messages';
 import MessageForm from './messageform';
 import ChannelForm from './channelform';
-import ChannelDeleteDialog from './delete';
+import DeleteForm from './deleteform';
 import { getChannels, getMessages } from '../api';
 
 const mapStateToProps = ({ username }) => ({ username });
@@ -15,7 +15,7 @@ const mapStateToProps = ({ username }) => ({ username });
 class App extends React.Component {
   componentDidMount() {
     const socket = io({ timeout: 20 });
-    const { updateMessages, pushChannelToState, removeChannelFromState } = this.props;
+    const { updateMessages, pushChannel, removeChannel } = this.props;
     socket
       .on('newMessage', ({ data: { attributes } }) => {
         const { cid, id } = attributes;
@@ -23,14 +23,14 @@ class App extends React.Component {
       })
       .on('newChannel', ({ data: { attributes } }) => {
         const { id } = attributes;
-        pushChannelToState({ cid: id, byCID: { [id]: attributes } });
+        pushChannel({ cid: id, byCID: { [id]: attributes } });
         this.syncChanel(id);
       })
       .on('renameChannel', ({ data: { attributes } }) => {
         const { id } = attributes;
-        pushChannelToState({ cid: id, byCID: { [id]: attributes } });
+        pushChannel({ cid: id, byCID: { [id]: attributes } });
       })
-      .on('removeChannel', ({ data: { id } }) => removeChannelFromState({ cid: id }))
+      .on('removeChannel', ({ data: { id } }) => removeChannel({ cid: id }))
 
       // Reconnect means that we've been being offline for a while.
       // Makes sense to resynchronize the entire base to get missed updates
@@ -81,7 +81,7 @@ class App extends React.Component {
           </Col>
         </Row>
         <ChannelForm />
-        <ChannelDeleteDialog />
+        <DeleteForm />
       </React.Fragment>
     );
   }

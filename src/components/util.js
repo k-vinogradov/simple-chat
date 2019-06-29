@@ -8,14 +8,3 @@ export const connect = mapStateToProps => component => reduxConnect(
 )(component);
 
 export const reduxForm = form => component => rf({ form })(component);
-
-export const isLockedState = (state) => {
-  switch (state) {
-    case 'normalLocked':
-    case 'channelFormDialogLocked':
-    case 'channelDeleteDialogLocked':
-      return true;
-    default:
-      return false;
-  }
-};
