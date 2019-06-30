@@ -27,11 +27,9 @@ const mapStateToProps = (
 @connect(mapStateToProps)
 class ChannelItem extends React.Component {
   select = () => {
-    const {
-      cid, currentCID, name, selectChannel,
-    } = this.props;
+    const { cid, currentCID, selectChannel } = this.props;
     if (cid === currentCID) return;
-    selectChannel({ cid, name });
+    selectChannel({ cid });
   };
 
   rename = () => {

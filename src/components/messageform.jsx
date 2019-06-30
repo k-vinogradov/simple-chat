@@ -12,11 +12,23 @@ const mapStateToProps = ({ ui: { currentCID }, username }) => ({ currentCID, use
 @connect(mapStateToProps)
 @reduxForm('newMessage')
 class MessageForm extends React.Component {
+  shouldComponentUpdate(nextProps) {
+    const { currentCID, reset } = this.props;
+    const { currentCID: nextCID } = nextProps;
+    if (currentCID !== nextCID) reset();
+    return true;
+  }
+
   submit = async ({ body }) => {
-    const { currentCID: cid, username, reset } = this.props;
+    const {
+      currentCID: cid, username, reset, selectChannel,
+    } = this.props;
     try {
       await sendMessage({ cid, username, body });
     } catch (error) {
+      // User could switch the channel during the request timeout.
+      // To show error message we have to switch it back
+      selectChannel({ cid });
       throw new SubmissionError({ _error: error.message });
     }
     reset();
