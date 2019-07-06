@@ -3,7 +3,7 @@ import {
   Row, Col, Button, Dropdown,
 } from 'react-bootstrap';
 import { connect } from './util';
-import ChannelOptButton from './channeloptbutton';
+import ChannelOptButton from './ChannelOptButton';
 
 const mapStateToProps = (
   {
@@ -13,16 +13,11 @@ const mapStateToProps = (
     ui: { currentCID },
   },
   { cid },
-) => {
-  const { name, removable } = byCID[cid];
-  return {
-    cid,
-    currentCID,
-    name,
-    removable,
-    buttonVariant: cid === currentCID ? 'secondary' : 'light',
-  };
-};
+) => ({
+  buttonVariant: cid === currentCID ? 'secondary' : 'light',
+  currentCID,
+  ...byCID[cid],
+});
 
 @connect(mapStateToProps)
 class ChannelItem extends React.Component {

@@ -8,14 +8,8 @@ class ChannelOptButton extends React.Component {
   };
 
   render() {
-    const { disabled } = this.props;
     return (
-      <Button
-        variant="outline-dark"
-        disabled={disabled}
-        onClick={this.handleClick}
-        className="border-0"
-      >
+      <Button variant="outline-dark" onClick={this.handleClick} className="border-0">
         <strong>⋮</strong>
       </Button>
     );

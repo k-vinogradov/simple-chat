@@ -1,11 +1,12 @@
 import axios from 'axios';
 import _ from 'lodash';
+import { SubmissionError } from 'redux-form';
 
 const apiUrl = (...path) => `/api/v1/channels/${path.join('/')}`;
 const channels = apiUrl;
 const messages = cid => apiUrl(cid, 'messages');
 
-export const sendMessage = async (message) => {
+const sendMessageMethod = async (message) => {
   const { cid } = message;
   const url = messages(cid);
   return axios.post(url, { data: { attributes: { ...message } } });
@@ -25,11 +26,24 @@ export const getMessages = async (cid) => {
   return _.keyBy(messageArray, ({ id }) => id);
 };
 
-export const postChannel = async name => axios.post(apiUrl(), { data: { attributes: { name } } });
+const postChannelMethod = async name => axios.post(apiUrl(), { data: { attributes: { name } } });
 
-export const patchChannel = async (name, cid) => {
+const patchChannelMethod = async (name, cid) => {
   const url = channels(cid);
   return axios.patch(url, { data: { attributes: { name } } });
 };
 
-export const deleteChannel = async cid => axios.delete(channels(cid));
+const deleteChannelMethod = async cid => axios.delete(channels(cid));
+
+export const formSubmitWrapper = call => async (...args) => {
+  try {
+    await call(...args);
+  } catch ({ message }) {
+    throw new SubmissionError({ _error: message });
+  }
+};
+
+export const deleteChannel = formSubmitWrapper(deleteChannelMethod);
+export const patchChannel = formSubmitWrapper(patchChannelMethod);
+export const postChannel = formSubmitWrapper(postChannelMethod);
+export const sendMessage = formSubmitWrapper(sendMessageMethod);

@@ -1,88 +1,47 @@
 import React from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
-import { Field, SubmissionError } from 'redux-form';
+import { Field } from 'redux-form';
 import classnames from 'classnames';
-import { connect, reduxForm } from './util';
-import { postChannel, patchChannel } from '../api';
 
-const mapStateToProps = ({
-  data: {
-    channels: { byCID },
-  },
-  ui: {
-    channelFormDialogState: { state, cid },
-  },
-}) => ({
-  apiMethod: state === 'new' ? postChannel : patchChannel,
-  cid,
-  name: state === 'rename' ? byCID[cid].name : '',
-  show: state !== 'inactive',
-});
-
-@connect(mapStateToProps)
-@reduxForm('channelForm')
 class ChannelForm extends React.Component {
-  shouldComponentUpdate(nextProps) {
-    const { initialize, name, submitting } = nextProps;
-    if (!submitting) initialize({ name }, true);
-    return true;
-  }
-
   submit = async ({ name }) => {
-    const {
-      cid, reset, closeChannelDialog, apiMethod,
-    } = this.props;
-    try {
-      await apiMethod(name, cid);
-    } catch ({ message }) {
-      throw new SubmissionError({ _error: message });
-    }
-    closeChannelDialog();
+    const { reset } = this.props;
+    await this.send(name);
+    this.close();
     reset();
   };
 
   close = () => {
-    const { reset, closeChannelDialog } = this.props;
-    reset();
+    const { closeChannelDialog } = this.props;
     closeChannelDialog();
   };
+
+  send = () => {};
 
   render() {
     const {
       error, handleSubmit, pristine, show, submitting,
     } = this.props;
-    const fieldClassName = classnames({ 'form-control': true, 'is-invalid': error });
+    const fieldProps = {
+      className: classnames({ 'form-control': true, 'is-invalid': error }),
+      component: 'input',
+      name: 'name',
+      placeholder: 'Channel name',
+      props: { disabled: submitting },
+      required: true,
+      type: 'text',
+    };
     return (
       <Modal show={show} backdrop="static">
         <Modal.Body>
           <Form onSubmit={handleSubmit(this.submit)}>
-            <Form.Group controlId="formBasicEmail">
-              <Field
-                props={{ disabled: submitting }}
-                name="name"
-                required
-                component="input"
-                type="text"
-                className={fieldClassName}
-                placeholder="Channel name"
-              />
-              <div className="invalid-feedback">{`Failed to save data: ${error}`}</div>
-            </Form.Group>
+            <Field {...fieldProps} />
+            <div className="invalid-feedback">{`Failed to save data: ${error}`}</div>
             <Modal.Footer>
-              <Button
-                variant="secondary"
-                id="closeChannelForm"
-                onClick={this.close}
-                disabled={submitting}
-              >
+              <Button variant="secondary" onClick={this.close} disabled={submitting}>
                 Close
               </Button>
-              <Button
-                variant="primary"
-                id="submitChannelForm"
-                type="submit"
-                disabled={pristine || submitting}
-              >
+              <Button variant="primary" type="submit" disabled={pristine || submitting}>
                 Save
               </Button>
             </Modal.Footer>

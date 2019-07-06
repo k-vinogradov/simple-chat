@@ -2,11 +2,12 @@ import React from 'react';
 import io from 'socket.io-client';
 import { Row, Col } from 'react-bootstrap';
 import { connect } from './util';
-import Sidebar from './sidebar';
-import Messages from './messages';
-import MessageForm from './messageform';
-import ChannelForm from './channelform';
-import DeleteForm from './deleteform';
+import Sidebar from './Sidebar';
+import Messages from './Messages';
+import MessageForm from './MessageForm';
+import DeleteForm from './DeleteForm';
+import NewChannelForm from './NewChannelForm';
+import RenameChannelForm from './RenameChannelForm';
 import { getChannels, getMessages } from '../api';
 
 const mapStateToProps = ({ username }) => ({ username });
@@ -80,7 +81,8 @@ class App extends React.Component {
             <MessageForm />
           </Col>
         </Row>
-        <ChannelForm />
+        <NewChannelForm />
+        <RenameChannelForm />
         <DeleteForm />
       </React.Fragment>
     );

@@ -1,36 +1,28 @@
 import React from 'react';
-import { Field, SubmissionError } from 'redux-form';
+import { Field, Form } from 'redux-form';
 import {
-  Row, Col, Form, InputGroup, Button,
+  Row, Col, InputGroup, Button,
 } from 'react-bootstrap';
 import classnames from 'classnames';
 import { connect, reduxForm } from './util';
 import { sendMessage } from '../api';
 
-const mapStateToProps = ({ ui: { currentCID }, username }) => ({ currentCID, username });
+const mapStateToProps = ({ ui: { currentCID: cid }, username }) => ({
+  cid,
+  destroyOnUnmount: false,
+  form: `messageForm${cid}`,
+  username,
+
+  // workaround to avoid https://github.com/erikras/redux-form/issues/2886
+  key: cid,
+});
 
 @connect(mapStateToProps)
-@reduxForm('newMessage')
+@reduxForm()
 class MessageForm extends React.Component {
-  shouldComponentUpdate(nextProps) {
-    const { currentCID, reset } = this.props;
-    const { currentCID: nextCID } = nextProps;
-    if (currentCID !== nextCID) reset();
-    return true;
-  }
-
   submit = async ({ body }) => {
-    const {
-      currentCID: cid, username, reset, selectChannel,
-    } = this.props;
-    try {
-      await sendMessage({ cid, username, body });
-    } catch (error) {
-      // User could switch the channel during the request timeout.
-      // To show error message we have to switch it back
-      selectChannel({ cid });
-      throw new SubmissionError({ _error: error.message });
-    }
+    const { cid, username, reset } = this.props;
+    await sendMessage({ cid, username, body });
     reset();
   };
 
@@ -38,22 +30,22 @@ class MessageForm extends React.Component {
     const {
       error, handleSubmit, pristine, submitting,
     } = this.props;
-    const className = classnames({ 'form-control': true, 'is-invalid': error });
+    const fieldProps = {
+      'aria-describedby': 'sendButton',
+      className: classnames({ 'form-control': true, 'is-invalid': error }),
+      component: 'input',
+      name: 'body',
+      placeholder: 'New message',
+      props: { disabled: submitting },
+      required: true,
+      type: 'text',
+    };
     return (
       <Row>
         <Col>
           <Form onSubmit={handleSubmit(this.submit)} className="m-2">
             <InputGroup>
-              <Field
-                props={{ disabled: submitting }}
-                name="body"
-                required
-                component="input"
-                type="text"
-                className={className}
-                placeholder="New message"
-                aria-describedby="sendButton"
-              />
+              <Field {...fieldProps} />
               <div className="input-group-append">
                 <Button type="submit" id="sendButton" disabled={pristine || submitting}>
                   Send

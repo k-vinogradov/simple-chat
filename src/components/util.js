@@ -7,4 +7,4 @@ export const connect = mapStateToProps => component => reduxConnect(
   actionCreators,
 )(component);
 
-export const reduxForm = form => component => rf({ form })(component);
+export const reduxForm = form => component => rf(form ? { form } : {})(component);
