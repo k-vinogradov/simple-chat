@@ -15,7 +15,7 @@ const mapStateToProps = ({ username }) => ({ username });
 @connect(mapStateToProps)
 class App extends React.Component {
   componentDidMount() {
-    const socket = io({ timeout: 20 });
+    const socket = io({ timeout: 20, transports: ['websocket'], upgrade: false });
     const { updateMessages, pushChannel, removeChannel } = this.props;
     socket
       .on('newMessage', ({ data: { attributes } }) => {
