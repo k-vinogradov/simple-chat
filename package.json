@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/k-vinogradov/project-lvl4-s453",
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.18.1",
     "bootstrap": "^4.1.3",
     "classnames": "^2.2.6",
     "debug": "^4.1.0",
